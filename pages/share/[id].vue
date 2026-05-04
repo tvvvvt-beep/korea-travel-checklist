@@ -1,34 +1,37 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { decompressFromEncodedURIComponent } from 'lz-string'
+import { doc, getDoc } from 'firebase/firestore'
 import type { ChecklistItem } from '~/types/checklist'
 
 const isLoading = ref(true)
 const errorMessage = ref('')
 const items = ref<ChecklistItem[]>([])
 
-onMounted(() => {
+onMounted(async () => {
   try {
     const route = useRoute()
-    const encodedData = route.query.data as string
+    const shareId = route.params.id as string
 
-    if (!encodedData) {
+    if (!shareId) {
       errorMessage.value = '共有リンクが無効です'
       isLoading.value = false
       return
     }
 
-    const decompressed = decompressFromEncodedURIComponent(encodedData)
+    const db = useFirestoreInstance()
+    const shareRef = doc(db, 'shares', shareId)
+    const snapshot = await getDoc(shareRef)
 
-    if (!decompressed) {
-      errorMessage.value = 'データの読み込みに失敗しました'
+    if (!snapshot.exists()) {
+      errorMessage.value = '共有されたチェックリストが見つかりません'
       isLoading.value = false
       return
     }
 
-    const data = JSON.parse(decompressed)
+    const data = snapshot.data()
+    const sharedItems = data.items || []
 
-    items.value = data.map((item: any) => ({
+    items.value = sharedItems.map((item: any) => ({
       ...item,
       createdAt: new Date(item.createdAt),
       updatedAt: new Date(item.updatedAt),

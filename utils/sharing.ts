@@ -1,11 +1,14 @@
-import { compressToEncodedURIComponent } from 'lz-string'
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore'
+import { getFirestoreInstance, SHARES_COLLECTION } from './firebase'
 import type { ChecklistItem } from '~/types/checklist'
 
 /**
- * Generate a shareable link for the checklist with data embedded in URL
+ * Generate a shareable link for the checklist by saving it to Firestore
  */
 export async function generateShareLink(items: ChecklistItem[]): Promise<string> {
   try {
+    const db = getFirestoreInstance()
+    
     // Convert items to plain JSON (Date objects to strings)
     const plainItems = items.map(item => ({
       ...item,
@@ -14,12 +17,16 @@ export async function generateShareLink(items: ChecklistItem[]): Promise<string>
       deadline: item.deadline?.toISOString() || null,
     }))
 
-    // Compress the data
-    const compressed = compressToEncodedURIComponent(JSON.stringify(plainItems))
+    // Save to Firestore
+    const docRef = await addDoc(collection(db, SHARES_COLLECTION), {
+      items: plainItems,
+      createdAt: serverTimestamp(),
+      title: 'Shared Checklist',
+    })
 
-    // Generate share URL with embedded data
+    // Generate share URL with the document ID
     const baseUrl = window.location.origin
-    return `${baseUrl}/share/checklist?data=${compressed}`
+    return `${baseUrl}/share/${docRef.id}`
   } catch (error) {
     console.error('Failed to generate share link:', error)
     throw new Error('共有リンクの生成に失敗しました')
@@ -27,7 +34,7 @@ export async function generateShareLink(items: ChecklistItem[]): Promise<string>
 }
 
 /**
- * Share checklist via Web Share API with data embedded in URL
+ * Share checklist via Web Share API
  */
 export async function shareChecklist(items: ChecklistItem[]): Promise<boolean> {
   if (!navigator.share) {
