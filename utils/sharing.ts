@@ -1,101 +1,33 @@
-import type { ChecklistItem, SharedChecklist, SharePermission } from '~/types/checklist'
+import { compressToEncodedURIComponent } from 'lz-string'
+import type { ChecklistItem } from '~/types/checklist'
 
 /**
- * Generate a shareable link for the checklist
+ * Generate a shareable link for the checklist with data embedded in URL
  */
-export async function generateShareLink(
-  items: ChecklistItem[],
-  permission: SharePermission = 'view'
-): Promise<string> {
-  // Generate a unique ID for the shared checklist
-  const shareId = crypto.randomUUID()
-
-  // Save the shared checklist to localStorage (in production, this would be saved to Firebase)
-  const shareData: SharedChecklist = {
-    id: shareId,
-    checklistId: 'local',
-    createdBy: 'local',
-    createdAt: new Date(),
-    permission,
-    accessCount: 0,
-  }
-
+export async function generateShareLink(items: ChecklistItem[]): Promise<string> {
   try {
-    // Store items and share data
-    localStorage.setItem(`shared-checklist-${shareId}`, JSON.stringify({
-      shareData,
-      items,
+    // Convert items to plain JSON (Date objects to strings)
+    const plainItems = items.map(item => ({
+      ...item,
+      createdAt: item.createdAt.toISOString(),
+      updatedAt: item.updatedAt.toISOString(),
+      deadline: item.deadline?.toISOString() || null,
     }))
+
+    // Compress the data
+    const compressed = compressToEncodedURIComponent(JSON.stringify(plainItems))
+
+    // Generate share URL with embedded data
+    const baseUrl = window.location.origin
+    return `${baseUrl}/share/checklist?data=${compressed}`
   } catch (error) {
-    console.error('Failed to save shared checklist:', error)
+    console.error('Failed to generate share link:', error)
     throw new Error('共有リンクの生成に失敗しました')
   }
-
-  // Generate share URL
-  const baseUrl = window.location.origin
-  return `${baseUrl}/share/${shareId}`
 }
 
 /**
- * Load shared checklist
- */
-export async function loadSharedChecklist(shareId: string): Promise<{
-  items: ChecklistItem[]
-  shareData: SharedChecklist
-} | null> {
-  try {
-    const data = localStorage.getItem(`shared-checklist-${shareId}`)
-    if (!data) {
-      return null
-    }
-
-    const { shareData, items } = JSON.parse(data)
-
-    // Convert date strings back to Date objects
-    const parsedItems = items.map((item: any) => ({
-      ...item,
-      createdAt: new Date(item.createdAt),
-      updatedAt: new Date(item.updatedAt),
-      deadline: item.deadline ? new Date(item.deadline) : undefined,
-    }))
-
-    // Update access count
-    shareData.accessCount++
-    localStorage.setItem(`shared-checklist-${shareId}`, JSON.stringify({
-      shareData,
-      items,
-    }))
-
-    return {
-      items: parsedItems,
-      shareData: {
-        ...shareData,
-        createdAt: new Date(shareData.createdAt),
-        expiresAt: shareData.expiresAt ? new Date(shareData.expiresAt) : undefined,
-      },
-    }
-  } catch (error) {
-    console.error('Failed to load shared checklist:', error)
-    return null
-  }
-}
-
-/**
- * Copy share link to clipboard
- */
-export async function copyShareLink(shareId: string): Promise<boolean> {
-  try {
-    const shareUrl = `${window.location.origin}/share/${shareId}`
-    await navigator.clipboard.writeText(shareUrl)
-    return true
-  } catch (error) {
-    console.error('Failed to copy share link:', error)
-    return false
-  }
-}
-
-/**
- * Share checklist via Web Share API
+ * Share checklist via Web Share API with data embedded in URL
  */
 export async function shareChecklist(items: ChecklistItem[]): Promise<boolean> {
   if (!navigator.share) {
@@ -103,23 +35,7 @@ export async function shareChecklist(items: ChecklistItem[]): Promise<boolean> {
   }
 
   try {
-    const shareId = crypto.randomUUID()
-    const shareUrl = `${window.location.origin}/share/${shareId}`
-
-    // Save shared checklist
-    const shareData: SharedChecklist = {
-      id: shareId,
-      checklistId: 'local',
-      createdBy: 'local',
-      createdAt: new Date(),
-      permission: 'view',
-      accessCount: 0,
-    }
-
-    localStorage.setItem(`shared-checklist-${shareId}`, JSON.stringify({
-      shareData,
-      items,
-    }))
+    const shareUrl = await generateShareLink(items)
 
     // Use Web Share API
     await navigator.share({
@@ -136,15 +52,15 @@ export async function shareChecklist(items: ChecklistItem[]): Promise<boolean> {
 }
 
 /**
- * Calculate share statistics
+ * Copy share link to clipboard
  */
-export function getShareStats(shareId: string): {
-  totalShares: number
-  totalAccess: number
-} {
-  // This would be implemented with Firebase in production
-  return {
-    totalShares: 0,
-    totalAccess: 0,
+export async function copyShareLink(items: ChecklistItem[]): Promise<boolean> {
+  try {
+    const shareUrl = await generateShareLink(items)
+    await navigator.clipboard.writeText(shareUrl)
+    return true
+  } catch (error) {
+    console.error('Failed to copy share link:', error)
+    return false
   }
 }
