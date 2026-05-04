@@ -1,70 +1,85 @@
 <template>
-  <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" @click.self="$emit('close')">
-    <div class="bg-white rounded-xl shadow-xl max-w-md w-full animate-slide-up">
+  <div class="fixed inset-0 bg-primary bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50 p-4" @click.self="$emit('close')">
+    <div class="bg-surface-container-lowest rounded-lg shadow-boarding-pass max-w-md w-full animate-slide-up border border-surface-variant">
       <div class="p-6">
-        <h2 class="text-xl font-bold text-gray-900 mb-4">チェックリストをエクスポート</h2>
+        <h2 class="font-headline-md text-headline-md text-primary mb-4 flex items-center gap-2">
+          <span class="material-symbols-outlined">download</span>
+          フライトプランをエクスポート
+        </h2>
 
         <form @submit.prevent="handleExport" class="space-y-4">
           <!-- Format -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
+            <label class="block font-label-bold text-on-surface mb-1 uppercase tracking-wider">
               フォーマット
             </label>
-            <select v-model="options.format" class="input">
-              <option value="pdf">PDF</option>
-              <option value="txt">テキスト</option>
-              <option value="csv">CSV</option>
-              <option value="json">JSON</option>
-            </select>
+            <div class="relative">
+              <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">description</span>
+              <select v-model="options.format" class="input pl-10">
+                <option value="pdf">PDF</option>
+                <option value="txt">テキスト</option>
+                <option value="csv">CSV</option>
+                <option value="json">JSON</option>
+              </select>
+            </div>
           </div>
 
           <!-- Options -->
           <div class="space-y-2">
-            <label class="flex items-center gap-2">
+            <label class="flex items-center gap-2 cursor-pointer">
               <input
                 v-model="options.includeChecked"
                 type="checkbox"
-                class="rounded"
+                class="custom-checkbox-input"
               />
-              <span class="text-sm">完了した項目を含める</span>
+              <span class="material-symbols-outlined text-primary-container">check_circle</span>
+              <span class="font-body-md text-on-surface">完了した項目を含める</span>
             </label>
 
-            <label class="flex items-center gap-2">
+            <label class="flex items-center gap-2 cursor-pointer">
               <input
                 v-model="options.includeNotes"
                 type="checkbox"
-                class="rounded"
+                class="custom-checkbox-input"
               />
-              <span class="text-sm">メモを含める</span>
+              <span class="material-symbols-outlined text-primary-container">note</span>
+              <span class="font-body-md text-on-surface">メモを含める</span>
             </label>
 
-            <label class="flex items-center gap-2">
+            <label class="flex items-center gap-2 cursor-pointer">
               <input
                 v-model="options.groupByCategory"
                 type="checkbox"
-                class="rounded"
+                class="custom-checkbox-input"
               />
-              <span class="text-sm">カテゴリでグループ化</span>
+              <span class="material-symbols-outlined text-primary-container">category</span>
+              <span class="font-body-md text-on-surface">カテゴリでグループ化</span>
             </label>
           </div>
 
           <!-- Sort by -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
+            <label class="block font-label-bold text-on-surface mb-1 uppercase tracking-wider">
               並び替え
             </label>
-            <select v-model="options.sortBy" class="input">
-              <option value="order">順序</option>
-              <option value="deadline">期限</option>
-              <option value="priority">優先度</option>
-              <option value="name">名前</option>
-            </select>
+            <div class="relative">
+              <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">sort</span>
+              <select v-model="options.sortBy" class="input pl-10">
+                <option value="order">順序</option>
+                <option value="deadline">出発時刻</option>
+                <option value="priority">優先度</option>
+                <option value="name">フライト名</option>
+              </select>
+            </div>
           </div>
 
           <!-- Preview -->
-          <div class="bg-gray-50 rounded-lg p-3 text-sm">
-            <p class="font-medium text-gray-700 mb-1">プレビュー</p>
-            <p class="text-gray-600">
+          <div class="bg-surface-container-low rounded-lg p-3 border border-surface-variant">
+            <p class="font-label-bold text-on-surface mb-1 uppercase flex items-center gap-1">
+              <span class="material-symbols-outlined text-sm">visibility</span>
+              プレビュー
+            </p>
+            <p class="font-body-md text-on-surface-variant">
               {{ formatDescription }}
             </p>
           </div>
@@ -82,6 +97,7 @@
               type="submit"
               class="btn btn-primary flex-1"
             >
+              <span class="material-symbols-outlined align-middle mr-1">file_download</span>
               エクスポート
             </button>
           </div>
@@ -128,3 +144,9 @@ async function handleExport() {
   }
 }
 </script>
+
+<style scoped>
+.custom-checkbox-input {
+  @apply w-4 h-4 rounded border-2 border-primary-container text-primary focus:ring-2 focus:ring-primary-container;
+}
+</style>

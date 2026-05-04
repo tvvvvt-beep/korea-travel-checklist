@@ -1,3 +1,7 @@
+/* Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700;900&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -5,48 +9,114 @@
 /* Custom base styles */
 @layer base {
   body {
-    @apply bg-gray-50 text-gray-900 antialiased;
+    @apply bg-surface text-on-surface antialiased;
+    font-family: 'Plus Jakarta Sans', sans-serif;
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
   }
 
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Space Grotesk', sans-serif;
+  }
+
   * {
-    @apply border-gray-200;
+    @apply border-outline-variant;
+  }
+
+  /* Material Symbols Outlined */
+  .material-symbols-outlined {
+    font-family: 'Material Symbols Outlined';
+    font-weight: normal;
+    font-style: normal;
+    font-size: 24px;
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    display: inline-block;
+    white-space: nowrap;
+    word-wrap: normal;
+    direction: ltr;
   }
 }
 
-/* Custom component styles */
+/* Custom component styles - Aviation theme */
 @layer components {
+  /* Buttons */
   .btn {
     @apply px-4 py-2 rounded-lg font-medium transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed;
+    font-family: 'Space Grotesk', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
   }
 
   .btn-primary {
-    @apply btn bg-primary-600 text-white hover:bg-primary-700 active:bg-primary-800;
+    @apply btn bg-secondary-container text-on-secondary-container hover:opacity-90 active:shadow-fab-active;
   }
 
   .btn-secondary {
-    @apply btn bg-gray-200 text-gray-700 hover:bg-gray-300 active:bg-gray-400;
+    @apply btn bg-primary-container text-on-primary-container hover:opacity-90;
+  }
+
+  .btn-ghost {
+    @apply btn border-2 border-primary text-primary bg-transparent hover:bg-primary-container hover:text-on-primary-container;
   }
 
   .btn-danger {
-    @apply btn bg-danger-600 text-white hover:bg-danger-700 active:bg-danger-800;
+    @apply btn bg-error-container text-on-error-container hover:opacity-90;
   }
 
+  /* Input fields */
   .input {
-    @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all;
+    @apply w-full px-3 py-2 border-2 border-outline rounded-lg focus:ring-2 focus:ring-primary-container focus:border-primary outline-none transition-all bg-surface-container-lowest;
   }
 
+  /* Cards */
   .card {
-    @apply bg-white rounded-xl shadow-sm border border-gray-200 p-4;
+    @apply bg-surface-container-lowest rounded-lg shadow-boarding-pass border border-surface-variant p-4;
   }
 
-  .checkbox-item {
-    @apply flex items-center gap-3 p-4 bg-white rounded-lg border border-gray-200 hover:border-primary-300 transition-colors cursor-pointer;
+  /* Boarding pass style task items */
+  .boarding-pass {
+    @apply bg-surface-container-lowest rounded-lg p-md shadow-boarding-pass flex items-center gap-md border-l-4 border-surface-variant cursor-pointer transition-colors hover:bg-surface-container-low;
   }
 
-  .checkbox-item.checked {
-    @apply bg-primary-50 border-primary-300;
+  .boarding-pass.checked {
+    @apply border-l-4 border-secondary-container;
+  }
+
+  .boarding-pass.priority {
+    @apply border-l-4 border-secondary-container;
+  }
+
+  /* Category headers */
+  .category-header {
+    @apply sticky top-0 bg-surface z-10 py-sm mb-md border-b-2 border-primary-container;
+  }
+
+  /* Progress bar - Flight path style */
+  .flight-path {
+    @apply h-2 bg-surface-variant rounded-full relative overflow-hidden;
+  }
+
+  .flight-path-progress {
+    @apply h-full bg-secondary-container rounded-full absolute left-0 top-0 shadow-flight-path;
+  }
+
+  /* Status chips */
+  .status-chip {
+    @apply font-label-sm text-label-sm px-2 py-1 rounded-full uppercase;
+  }
+
+  .status-arrival {
+    @apply bg-arrival text-white;
+  }
+
+  .status-delayed {
+    @apply bg-delayed text-white;
+  }
+
+  .status-cancelled {
+    @apply bg-cancelled text-white;
   }
 }
 
@@ -61,6 +131,10 @@
   }
 
   .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .pb-safe {
     padding-bottom: env(safe-area-inset-bottom);
   }
 }
@@ -78,7 +152,7 @@
 
 /* Touch feedback */
 .touch-feedback {
-  -webkit-tap-highlight-color: rgba(59, 130, 246, 0.3);
+  -webkit-tap-highlight-color: rgba(0, 32, 69, 0.3);
   user-select: none;
 }
 
@@ -87,20 +161,69 @@
   transition: all 0.2s ease-in-out;
 }
 
-/* Custom scrollbar */
+/* Custom scrollbar - Minimalist */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 4px;
+  height: 4px;
 }
 
 ::-webkit-scrollbar-track {
-  @apply bg-gray-100;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-gray-300 rounded-full;
+  background-color: #d8dadc;
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  @apply bg-gray-400;
+  background-color: #c4c6cf;
+}
+
+/* Custom scrollbar for checklist container */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #d8dadc;
+  border-radius: 4px;
+}
+
+/* Safe area support for iOS */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* Checkbox styles */
+.custom-checkbox {
+  @apply relative flex items-center justify-center w-6 h-6 border-2 border-primary-container rounded flex-shrink-0 bg-surface-container-lowest;
+}
+
+.custom-checkbox input {
+  @apply opacity-0 absolute inset-0 cursor-pointer;
+}
+
+.custom-checkbox .check-icon {
+  @apply material-symbols-outlined text-primary-container opacity-0 pointer-events-none text-[18px] font-bold transition-opacity;
+}
+
+.custom-checkbox input:checked + .check-icon {
+  @apply opacity-100;
+}
+
+/* Bottom nav active state */
+.bottom-nav-active {
+  @apply bg-secondary-container text-on-secondary-container rounded-sm;
+}
+
+/* FAB button */
+.fab-button {
+  @apply bg-secondary-container text-on-secondary-container w-14 h-14 rounded-full flex items-center justify-center shadow-fab hover:scale-105 active:shadow-fab-active transition-all z-20;
 }

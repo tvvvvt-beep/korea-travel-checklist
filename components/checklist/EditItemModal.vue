@@ -1,54 +1,63 @@
 <template>
-  <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" @click.self="$emit('close')">
-    <div class="bg-white rounded-xl shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto animate-slide-up">
+  <div class="fixed inset-0 bg-primary bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50 p-4" @click.self="$emit('close')">
+    <div class="bg-surface-container-lowest rounded-lg shadow-boarding-pass max-w-md w-full max-h-[90vh] overflow-y-auto animate-slide-up border border-surface-variant">
       <div class="p-6">
-        <h2 class="text-xl font-bold text-gray-900 mb-4">項目を編集</h2>
+        <h2 class="font-headline-md text-headline-md text-primary mb-4 flex items-center gap-2">
+          <span class="material-symbols-outlined">edit</span>
+          フライトを編集
+        </h2>
 
         <form @submit.prevent="handleSubmit" class="space-y-4">
           <!-- Text -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-              項目名 <span class="text-red-500">*</span>
+            <label class="block font-label-bold text-on-surface mb-1 uppercase tracking-wider">
+              項目名 <span class="text-error">*</span>
             </label>
-            <input
-              v-model="formData.text"
-              type="text"
-              required
-              class="input"
-            />
+            <div class="relative">
+              <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">label</span>
+              <input
+                v-model="formData.text"
+                type="text"
+                required
+                class="input pl-10"
+              />
+            </div>
           </div>
 
           <!-- Category -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-              カテゴリ
+            <label class="block font-label-bold text-on-surface mb-1 uppercase tracking-wider">
+              ターミナル（カテゴリ）
             </label>
-            <select v-model="formData.category" class="input">
-              <option
-                v-for="cat in categories"
-                :key="cat.id"
-                :value="cat.id"
-              >
-                {{ cat.icon }} {{ cat.name }}
-              </option>
-            </select>
+            <div class="relative">
+              <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">category</span>
+              <select v-model="formData.category" class="input pl-10">
+                <option
+                  v-for="cat in categories"
+                  :key="cat.id"
+                  :value="cat.id"
+                >
+                  {{ cat.icon }} {{ cat.name }}
+                </option>
+              </select>
+            </div>
           </div>
 
           <!-- Priority -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
+            <label class="block font-label-bold text-on-surface mb-1 uppercase tracking-wider">
               優先度
             </label>
-            <div class="flex gap-2">
+            <div class="grid grid-cols-4 gap-2">
               <button
                 v-for="priority in priorities"
                 :key="priority.value"
                 type="button"
                 @click="formData.priority = priority.value"
-                class="flex-1 py-2 px-3 rounded-lg border-2 transition-colors"
+                class="py-2 px-2 rounded-lg border-2 transition-colors font-label-sm text-center"
                 :class="formData.priority === priority.value
                   ? priority.activeClass
-                  : 'border-gray-200 hover:border-gray-300'"
+                  : 'border-surface-variant hover:border-primary-container'"
               >
                 {{ priority.label }}
               </button>
@@ -57,24 +66,28 @@
 
           <!-- Deadline -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-              期限（オプション）
+            <label class="block font-label-bold text-on-surface mb-1 uppercase tracking-wider">
+              出発時刻（期限）
             </label>
-            <input
-              v-model="deadlineInput"
-              type="date"
-              class="input"
-            />
+            <div class="relative">
+              <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">event</span>
+              <input
+                v-model="deadlineInput"
+                type="date"
+                class="input pl-10"
+              />
+            </div>
           </div>
 
           <!-- Notes -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-              メモ（オプション）
+            <label class="block font-label-bold text-on-surface mb-1 uppercase tracking-wider">
+              メモ
             </label>
             <textarea
               v-model="formData.notes"
               rows="3"
+              placeholder="追加のメモがあれば入力"
               class="input"
             ></textarea>
           </div>
@@ -93,6 +106,7 @@
               :disabled="!formData.text.trim()"
               class="btn btn-primary flex-1"
             >
+              <span class="material-symbols-outlined align-middle mr-1">save</span>
               保存
             </button>
           </div>
@@ -140,10 +154,10 @@ const deadlineInput = ref(
 const categories = Object.values(CATEGORY_DEFINITIONS)
 
 const priorities = [
-  { value: 'urgent' as Priority, label: '緊急', activeClass: 'border-danger-500 bg-danger-50 text-danger-800' },
-  { value: 'high' as Priority, label: '高', activeClass: 'border-orange-500 bg-orange-50 text-orange-800' },
-  { value: 'medium' as Priority, label: '中', activeClass: 'border-yellow-500 bg-yellow-50 text-yellow-800' },
-  { value: 'low' as Priority, label: '低', activeClass: 'border-green-500 bg-green-50 text-green-800' },
+  { value: 'urgent' as Priority, label: '緊急', activeClass: 'border-error bg-error-container text-on-error-container' },
+  { value: 'high' as Priority, label: '高', activeClass: 'border-delayed bg-delayed text-white' },
+  { value: 'medium' as Priority, label: '中', activeClass: 'border-primary bg-primary-container text-on-primary-container' },
+  { value: 'low' as Priority, label: '低', activeClass: 'border-arrival bg-arrival text-white' },
 ]
 
 watch(deadlineInput, (value) => {

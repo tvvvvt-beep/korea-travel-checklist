@@ -1,43 +1,53 @@
 <template>
-  <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" @click.self="$emit('close')">
-    <div class="bg-white rounded-xl shadow-xl max-w-md w-full animate-slide-up">
+  <div class="fixed inset-0 bg-primary bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50 p-4" @click.self="$emit('close')">
+    <div class="bg-surface-container-lowest rounded-lg shadow-boarding-pass max-w-md w-full animate-slide-up border border-surface-variant">
       <div class="p-6">
-        <h2 class="text-xl font-bold text-gray-900 mb-4">チェックリストを共有</h2>
+        <h2 class="font-headline-md text-headline-md text-primary mb-4 flex items-center gap-2">
+          <span class="material-symbols-outlined">share</span>
+          フライトプランを共有
+        </h2>
 
         <div class="space-y-4">
-          <p class="text-gray-600">
+          <p class="font-body-md text-on-surface-variant">
             チェックリストを他の人と共有できます。
           </p>
 
           <!-- Share link -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
+            <label class="block font-label-bold text-on-surface mb-1 uppercase tracking-wider">
               共有リンク
             </label>
             <div class="flex gap-2">
-              <input
-                :value="shareLink"
-                readonly
-                class="input flex-1 text-sm"
-              />
+              <div class="relative flex-1">
+                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[20px]">link</span>
+                <input
+                  :value="shareLink"
+                  readonly
+                  class="input pl-10 text-sm"
+                />
+              </div>
               <button
                 @click="copyLink"
                 class="btn btn-primary"
               >
-                {{ copied ? 'コピーしました!' : 'コピー' }}
+                <span class="material-symbols-outlined align-middle">{{ copied ? 'check_circle' : 'content_copy' }}</span>
+                {{ copied ? '完了!' : 'コピー' }}
               </button>
             </div>
           </div>
 
           <!-- Permission -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
+            <label class="block font-label-bold text-on-surface mb-1 uppercase tracking-wider">
               権限
             </label>
-            <select v-model="permission" class="input">
-              <option value="view">閲覧のみ</option>
-              <option value="edit">編集可能</option>
-            </select>
+            <div class="relative">
+              <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">lock_open</span>
+              <select v-model="permission" class="input pl-10">
+                <option value="view">閲覧のみ</option>
+                <option value="edit">編集可能</option>
+              </select>
+            </div>
           </div>
 
           <!-- Share options -->
@@ -46,12 +56,14 @@
               @click="shareViaWebShare"
               class="btn btn-secondary flex-1"
             >
+              <span class="material-symbols-outlined align-middle mr-1">share</span>
               共有
             </button>
             <button
               @click="generateNewLink"
               class="btn btn-secondary flex-1"
             >
+              <span class="material-symbols-outlined align-middle mr-1">refresh</span>
               新しいリンク
             </button>
           </div>

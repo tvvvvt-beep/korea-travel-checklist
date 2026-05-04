@@ -1,26 +1,26 @@
 <template>
-  <div class="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+  <div class="flex gap-2 overflow-x-auto pb-2">
     <button
       v-for="category in categories"
       :key="category.id"
       @click="$emit('select', category.id)"
-      class="flex-shrink-0 px-4 py-2 rounded-lg font-medium transition-all duration-200 flex items-center gap-2 touch-feedback"
+      class="flex-shrink-0 px-4 py-2 rounded-lg font-label-bold transition-all duration-200 flex items-center gap-2 touch-feedback uppercase tracking-wider"
       :class="[
         isActive(category.id)
-          ? getCategoryColorClasses(category.id).bg + ' ' +
-            getCategoryColorClasses(category.id).text + ' ' +
-            'border-2 ' + getCategoryColorClasses(category.id).border
-          : 'bg-white text-gray-700 border-2 border-gray-200 hover:bg-gray-50'
+          ? 'bg-primary-container text-on-primary-container border-2 border-primary-container'
+          : 'bg-surface-container-lowest text-on-surface-variant border-2 border-surface-variant hover:bg-surface-container-low hover:text-primary-container'
       ]"
     >
-      <span class="text-xl">{{ category.icon }}</span>
+      <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">
+        {{ category.icon }}
+      </span>
       <span class="hidden sm:inline">{{ category.name }}</span>
       <span
         v-if="getCategoryStats(category.id).total > 0"
-        class="text-xs px-2 py-0.5 rounded-full"
+        class="text-xs px-2 py-0.5 rounded-full font-label-sm"
         :class="isActive(category.id)
-          ? 'bg-white bg-opacity-30'
-          : 'bg-gray-200'"
+          ? 'bg-on-primary-container bg-opacity-30'
+          : 'bg-surface-variant'"
       >
         {{ getCategoryStats(category.id).checked }}/{{ getCategoryStats(category.id).total }}
       </span>
@@ -30,7 +30,6 @@
 
 <script setup lang="ts">
 import { CATEGORY_DEFINITIONS } from '~/data/categories'
-import { getCategoryColorClasses } from '~/utils/categories'
 import type { Category } from '~/types/checklist'
 
 interface Props {

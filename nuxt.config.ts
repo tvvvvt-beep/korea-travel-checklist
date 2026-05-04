@@ -13,15 +13,19 @@ export default defineNuxtConfig({
 
   app: {
     head: {
-      title: 'ソウル旅行前チェックリスト',
+      title: 'DEPARTURES - ソウル旅行',
       meta: [
         { charset: 'utf-8' },
         { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-        { name: 'description', content: '2026年5月ソウル旅行のための包括的チェックリスト' },
-        { name: 'theme-color', content: '#3b82f6' },
+        { name: 'description', content: '2026年5月13日〜18日 ソウル旅行チェックリスト' },
+        { name: 'theme-color', content: '#002045' },
       ],
       link: [
         { rel: 'manifest', href: '/manifest.webmanifest' },
+        { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
+        { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' },
+        { href: 'https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700;900&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap', rel: 'stylesheet' },
+        { href: 'https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap', rel: 'stylesheet' },
       ],
     },
   },

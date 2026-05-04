@@ -1,5 +1,5 @@
 <template>
-  <div class="space-y-3">
+  <div class="flex flex-col gap-sm">
     <ChecklistItem
       v-for="item in items"
       :key="item.id"
@@ -12,6 +12,7 @@
 </template>
 
 <script setup lang="ts">
+import ChecklistItem from '~/components/checklist/ChecklistItem.vue'
 import type { ChecklistItem } from '~/types/checklist'
 import type { Category } from '~/types/checklist'
 

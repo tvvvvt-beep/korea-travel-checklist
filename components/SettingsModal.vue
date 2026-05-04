@@ -1,16 +1,23 @@
 <template>
-  <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" @click.self="$emit('close')">
-    <div class="bg-white rounded-xl shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto animate-slide-up">
+  <div class="fixed inset-0 bg-primary bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50 p-4" @click.self="$emit('close')">
+    <div class="bg-surface-container-lowest rounded-lg shadow-boarding-pass max-w-md w-full max-h-[90vh] overflow-y-auto animate-slide-up border border-surface-variant">
       <div class="p-6">
-        <h2 class="text-xl font-bold text-gray-900 mb-4">設定</h2>
+        <h2 class="font-headline-md text-headline-md text-primary mb-4 flex items-center gap-2">
+          <span class="material-symbols-outlined">settings</span>
+          設定
+        </h2>
 
         <div class="space-y-6">
           <!-- Sync section -->
           <section>
-            <h3 class="font-medium text-gray-900 mb-2">クラウド同期</h3>
-            <div class="bg-gray-50 rounded-lg p-4">
+            <h3 class="font-label-bold text-on-surface mb-2 uppercase tracking-wider flex items-center gap-1">
+              <span class="material-symbols-outlined text-sm">cloud_sync</span>
+              クラウド同期
+            </h3>
+            <div class="bg-surface-container-low rounded-lg p-4 border border-surface-variant">
               <div v-if="isAuthenticated" class="space-y-3">
-                <p class="text-sm text-gray-600">
+                <p class="font-body-md text-on-surface-variant flex items-center gap-2">
+                  <span class="material-symbols-outlined text-primary-container">account_circle</span>
                   ログイン中: {{ userEmail }}
                 </p>
                 <div class="flex gap-2">
@@ -19,30 +26,34 @@
                     :disabled="syncing"
                     class="btn btn-primary flex-1"
                   >
+                    <span class="material-symbols-outlined align-middle mr-1">{{ syncing ? 'sync' : 'sync' }}</span>
                     {{ syncing ? '同期中...' : '今すぐ同期' }}
                   </button>
                   <button
                     @click="handleSignOut"
                     class="btn btn-secondary"
                   >
-                    ログアウト
+                    <span class="material-symbols-outlined align-middle">logout</span>
                   </button>
                 </div>
-                <p v-if="lastSync" class="text-xs text-gray-500">
+                <p v-if="lastSync" class="font-label-sm text-on-surface-variant flex items-center gap-1">
+                  <span class="material-symbols-outlined text-sm">schedule</span>
                   最終同期: {{ lastSync }}
                 </p>
-                <p v-if="syncError" class="text-xs text-red-600">
+                <p v-if="syncError" class="font-label-sm text-error flex items-center gap-1">
+                  <span class="material-symbols-outlined text-sm">error</span>
                   {{ syncError }}
                 </p>
               </div>
               <div v-else class="space-y-3">
-                <p class="text-sm text-gray-600">
+                <p class="font-body-md text-on-surface-variant">
                   ログインすると、複数デバイス間でチェックリストを同期できます。
                 </p>
                 <button
                   @click="showAuthModal = true"
                   class="btn btn-primary w-full"
                 >
+                  <span class="material-symbols-outlined align-middle mr-1">login</span>
                   ログイン
                 </button>
               </div>
@@ -51,30 +62,37 @@
 
           <!-- Data management -->
           <section>
-            <h3 class="font-medium text-gray-900 mb-2">データ管理</h3>
+            <h3 class="font-label-bold text-on-surface mb-2 uppercase tracking-wider flex items-center gap-1">
+              <span class="material-symbols-outlined text-sm">storage</span>
+              データ管理
+            </h3>
             <div class="space-y-2">
               <button
                 @click="handleImportPresets"
                 class="btn btn-secondary w-full"
               >
+                <span class="material-symbols-outlined align-middle mr-1">flight_takeoff</span>
                 🇰🇷 韓国旅行プリセットを読み込み
               </button>
               <button
                 @click="handleExportBackup"
                 class="btn btn-secondary w-full"
               >
+                <span class="material-symbols-outlined align-middle mr-1">file_download</span>
                 バックアップをエクスポート
               </button>
               <button
                 @click="handleImportBackup"
                 class="btn btn-secondary w-full"
               >
+                <span class="material-symbols-outlined align-middle mr-1">file_upload</span>
                 バックアップから復元
               </button>
               <button
                 @click="handleClearData"
                 class="btn btn-danger w-full"
               >
+                <span class="material-symbols-outlined align-middle mr-1">delete_forever</span>
                 すべてのデータを削除
               </button>
             </div>
@@ -82,21 +100,31 @@
 
           <!-- Notifications -->
           <section>
-            <h3 class="font-medium text-gray-900 mb-2">通知</h3>
-            <label class="flex items-center justify-between">
-              <span class="text-sm">期限リマインダーを有効にする</span>
+            <h3 class="font-label-bold text-on-surface mb-2 uppercase tracking-wider flex items-center gap-1">
+              <span class="material-symbols-outlined text-sm">notifications</span>
+              通知
+            </h3>
+            <label class="flex items-center justify-between cursor-pointer">
+              <span class="font-body-md text-on-surface">期限リマインダーを有効にする</span>
               <input
                 v-model="notificationsEnabled"
                 type="checkbox"
-                class="rounded"
+                class="toggle-checkbox"
               />
             </label>
           </section>
 
           <!-- App info -->
-          <section class="text-xs text-gray-500">
+          <section class="font-label-sm text-on-surface-variant border-t border-surface-variant pt-4">
+            <div class="flex items-center gap-2 mb-1">
+              <span class="material-symbols-outlined text-primary-container">flight</span>
+              <p class="font-label-bold text-primary-container uppercase">DEPARTURES</p>
+            </div>
             <p>ソウル旅行前チェックリスト v1.0.0</p>
-            <p>旅行日: 2026年5月13日〜18日</p>
+            <p class="flex items-center gap-1">
+              <span class="material-symbols-outlined text-sm">event</span>
+              旅行日: 2026年5月13日〜18日
+            </p>
           </section>
         </div>
 
@@ -218,3 +246,23 @@ async function handleClearData() {
   }
 }
 </script>
+
+<style scoped>
+.toggle-checkbox {
+  @apply w-11 h-6 bg-surface-variant rounded-full relative cursor-pointer transition-colors;
+  appearance: none;
+}
+
+.toggle-checkbox::after {
+  content: '';
+  @apply absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow transition-transform;
+}
+
+.toggle-checkbox:checked {
+  @apply bg-secondary-container;
+}
+
+.toggle-checkbox:checked::after {
+  @apply translate-x-5;
+}
+</style>
