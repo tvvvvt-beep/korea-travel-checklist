@@ -1,171 +1,144 @@
+import { doc, getDoc, setDoc, onSnapshot } from 'firebase/firestore'
+import type { ChecklistItem } from '~/types/checklist'
+
 /**
- * Sync composable for Firebase synchronization
+ * Sync composable for checklist data
  */
 export function useSync() {
-  const syncStore = useSyncStore()
-  const checklistStore = useChecklistStore()
-  const authStore = useAuthStore()
+  const { isFirebaseConfigured } = useFirebase()
+  const { user, isAuthenticated } = useAuth()
+  const isSyncing = useState<boolean>('sync-syncing', () => false)
+  const lastSyncTime = useState<Date | null>('sync-last-sync', () => null)
+  const syncError = useState<string>('sync-error', () => '')
 
   /**
-   * Enable sync and start listening for changes
+   * Get checklist document reference
    */
-  async function enableSync(): Promise<void> {
-    if (!authStore.isAuthenticated) {
-      throw new Error('同期を有効にするにはログインしてください')
-    }
-
-    try {
-      syncStore.enableSync()
-      await syncWithFirebase()
-    } catch (error) {
-      console.error('Failed to enable sync:', error)
-      throw error
-    }
+  function getChecklistRef(userId: string) {
+    const db = useFirestoreInstance()
+    return doc(db, 'users', userId, 'checklist', 'main')
   }
 
   /**
-   * Disable sync
+   * Load checklist from Firestore
    */
-  function disableSync(): void {
-    syncStore.disableSync()
-  }
-
-  /**
-   * Sync with Firebase
-   */
-  async function syncWithFirebase(): Promise<void> {
-    if (!authStore.isAuthenticated) {
-      return
+  async function loadFromFirestore(): Promise<ChecklistItem[] | null> {
+    if (!isAuthenticated.value || !user.value) {
+      return null
     }
 
-    syncStore.setSyncing(true)
-    syncStore.setSyncError(null)
+    isSyncing.value = true
+    syncError.value = ''
 
     try {
-      const { getFirestoreInstance } = useUtils().firebase
-      const { doc, getDoc, setDoc, updateDoc } = await import('firebase/firestore')
+      const checklistRef = getChecklistRef(user.value.uid)
+      const snapshot = await getDoc(checklistRef)
 
-      const db = getFirestoreInstance()
-      const userId = authStore.userId!
+      if (snapshot.exists()) {
+        const data = snapshot.data()
+        const items = data.items || []
 
-      // Get user's checklist document
-      const checklistRef = doc(db, 'users', userId, 'checklist', 'main')
-      const checklistDoc = await getDoc(checklistRef)
-
-      if (checklistDoc.exists()) {
-        // Merge local and remote changes
-        const remoteData = checklistDoc.data()
-        const localItems = checklistStore.items
-
-        // Simple conflict resolution: use most recently updated
-        // In production, implement more sophisticated conflict resolution
-        if (remoteData.updatedAt && localItems.length > 0) {
-          const remoteUpdateTime = new Date(remoteData.updatedAt)
-          const localUpdateTime = new Date(
-            Math.max(...localItems.map(item => new Date(item.updatedAt).getTime()))
-          )
-
-          if (remoteUpdateTime > localUpdateTime) {
-            // Remote is newer, load it
-            const items = remoteData.items || []
-            checklistStore.loadItems(items)
-          } else if (localUpdateTime > remoteUpdateTime) {
-            // Local is newer, upload it
-            await uploadToFirebase()
-          }
-        } else if (!remoteData.updatedAt && localItems.length > 0) {
-          // No remote data, upload local
-          await uploadToFirebase()
-        } else if (remoteData.updatedAt && localItems.length === 0) {
-          // No local data, download remote
-          const items = remoteData.items || []
-          checklistStore.loadItems(items)
-        }
-      } else {
-        // No remote document, create one
-        await uploadToFirebase()
+        // Convert date strings to Date objects
+        return items.map((item: any) => ({
+          ...item,
+          createdAt: new Date(item.createdAt),
+          updatedAt: new Date(item.updatedAt),
+          deadline: item.deadline ? new Date(item.deadline) : undefined,
+        }))
       }
 
-      syncStore.setLastSync(new Date())
-      syncStore.setPendingChanges(0)
-    } catch (error: any) {
-      console.error('Sync failed:', error)
-      syncStore.setSyncError(error.message || '同期に失敗しました')
-      throw error
+      return null
+    } catch (err: any) {
+      console.error('Failed to load from Firestore:', err)
+      syncError.value = handleFirebaseError(err)
+      return null
     } finally {
-      syncStore.setSyncing(false)
+      isSyncing.value = false
     }
   }
 
   /**
-   * Upload local data to Firebase
+   * Save checklist to Firestore
    */
-  async function uploadToFirebase(): Promise<void> {
-    if (!authStore.isAuthenticated) {
-      throw new Error('ログインが必要です')
+  async function saveToFirestore(items: ChecklistItem[]): Promise<boolean> {
+    if (!isAuthenticated.value || !user.value) {
+      return false
     }
+
+    isSyncing.value = true
+    syncError.value = ''
 
     try {
-      const { getFirestoreInstance } = useUtils().firebase
-      const { doc, setDoc, serverTimestamp } = await import('firebase/firestore')
+      const checklistRef = getChecklistRef(user.value.uid)
 
-      const db = getFirestoreInstance()
-      const userId = authStore.userId!
-      const checklistRef = doc(db, 'users', userId, 'checklist', 'main')
+      // Convert Date objects to ISO strings
+      const plainItems = items.map(item => ({
+        ...item,
+        createdAt: item.createdAt.toISOString(),
+        updatedAt: item.updatedAt.toISOString(),
+        deadline: item.deadline?.toISOString() || null,
+      }))
 
       await setDoc(checklistRef, {
-        items: checklistStore.items,
-        updatedAt: serverTimestamp(),
-        version: '1.0.0',
-      })
+        items: plainItems,
+        updatedAt: new Date().toISOString(),
+      }, { merge: true })
 
-      syncStore.setLastSync(new Date())
-      syncStore.setPendingChanges(0)
-    } catch (error: any) {
-      console.error('Upload failed:', error)
-      syncStore.setSyncError(error.message || 'アップロードに失敗しました')
-      throw error
+      lastSyncTime.value = new Date()
+      return true
+    } catch (err: any) {
+      console.error('Failed to save to Firestore:', err)
+      syncError.value = handleFirebaseError(err)
+      return false
+    } finally {
+      isSyncing.value = false
     }
   }
 
   /**
-   * Manual sync trigger
+   * Setup real-time sync listener
    */
-  async function manualSync(): Promise<void> {
-    await syncWithFirebase()
-  }
+  function setupSyncListener(callback: (items: ChecklistItem[]) => void): () => void {
+    if (!isAuthenticated.value || !user.value) {
+      return () => {}
+    }
 
-  /**
-   * Check if sync is available
-   */
-  function isSyncAvailable(): boolean {
-    return authStore.isAuthenticated && isFirebaseConfigured()
+    const checklistRef = getChecklistRef(user.value.uid)
+
+    const unsubscribe = onSnapshot(
+      checklistRef,
+      (snapshot) => {
+        if (snapshot.exists()) {
+          const data = snapshot.data()
+          const items = data.items || []
+
+          // Convert date strings to Date objects
+          const parsedItems = items.map((item: any) => ({
+            ...item,
+            createdAt: new Date(item.createdAt),
+            updatedAt: new Date(item.updatedAt),
+            deadline: item.deadline ? new Date(item.deadline) : undefined,
+          }))
+
+          callback(parsedItems)
+          lastSyncTime.value = new Date()
+        }
+      },
+      (err) => {
+        console.error('Sync listener error:', err)
+        syncError.value = handleFirebaseError(err)
+      }
+    )
+
+    return unsubscribe
   }
 
   return {
-    // State
-    enabled: computed(() => syncStore.enabled),
-    syncing: computed(() => syncStore.syncing),
-    lastSync: computed(() => syncStore.lastSync),
-    error: computed(() => syncStore.error),
-    pendingChanges: computed(() => syncStore.pendingChanges),
-    isSyncAvailable,
-
-    // Actions
-    enableSync,
-    disableSync,
-    manualSync,
-    uploadToFirebase,
+    isSyncing: readonly(isSyncing),
+    lastSyncTime: readonly(lastSyncTime),
+    syncError: readonly(syncError),
+    loadFromFirestore,
+    saveToFirestore,
+    setupSyncListener,
   }
-}
-
-/**
- * Check if Firebase is configured
- */
-function isFirebaseConfigured(): boolean {
-  const config = useRuntimeConfig()
-  return !!(
-    config.public.firebaseApiKey &&
-    config.public.firebaseProjectId
-  )
 }

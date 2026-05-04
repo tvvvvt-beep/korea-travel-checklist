@@ -1,170 +1,119 @@
-import {
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  signInWithPopup,
-  GoogleAuthProvider,
-  onAuthStateChanged,
-  type User,
-  type UserCredential,
-} from 'firebase/auth'
-import { doc, setDoc, getDoc } from 'firebase/firestore'
+import { GoogleAuthProvider, signInWithPopup, signOut as firebaseSignOut, onAuthStateChanged } from 'firebase/auth'
+import { doc, getDoc, setDoc } from 'firebase/firestore'
+import type { User } from '~/types/checklist'
 
 /**
- * Firebase Authentication composable
+ * Authentication composable
  */
 export function useAuth() {
-  const authStore = useAuthStore()
-  const syncStore = useSyncStore()
-
-  /**
-   * Initialize auth state listener
-   */
-  function initializeAuthListener() {
-    if (process.client) {
-      const { getAuthInstance } = useUtils().firebase
-      const auth = getAuthInstance()
-
-      onAuthStateChanged(auth, async (user) => {
-        authStore.setUser(user)
-
-        if (user) {
-          // Load user data from Firestore
-          await loadUserData(user.uid)
-          syncStore.enableSync()
-        } else {
-          syncStore.disableSync()
-        }
-
-        authStore.setLoading(false)
-      })
-    }
-  }
-
-  /**
-   * Load user data from Firestore
-   */
-  async function loadUserData(userId: string) {
-    try {
-      const db = useUtils().firebase.getFirestoreInstance()
-      const userDoc = await getDoc(doc(db, 'users', userId))
-
-      if (userDoc.exists()) {
-        const data = userDoc.data()
-        // Load user preferences if needed
-      }
-    } catch (error) {
-      console.error('Failed to load user data:', error)
-    }
-  }
-
-  /**
-   * Sign in with email and password
-   */
-  async function signIn(email: string, password: string): Promise<UserCredential> {
-    authStore.setLoading(true)
-    authStore.clearError()
-
-    try {
-      const auth = useUtils().firebase.getAuthInstance()
-      const result = await signInWithEmailAndPassword(auth, email, password)
-      return result
-    } catch (error: any) {
-      const errorMessage = handleFirebaseError(error)
-      authStore.setError(errorMessage)
-      throw error
-    } finally {
-      authStore.setLoading(false)
-    }
-  }
-
-  /**
-   * Sign up with email and password
-   */
-  async function signUp(email: string, password: string): Promise<UserCredential> {
-    authStore.setLoading(true)
-    authStore.clearError()
-
-    try {
-      const auth = useUtils().firebase.getAuthInstance()
-      const result = await createUserWithEmailAndPassword(auth, email, password)
-
-      // Create user document in Firestore
-      await createUserDocument(result.user)
-
-      return result
-    } catch (error: any) {
-      const errorMessage = handleFirebaseError(error)
-      authStore.setError(errorMessage)
-      throw error
-    } finally {
-      authStore.setLoading(false)
-    }
-  }
+  const { isFirebaseConfigured } = useFirebase()
+  const user = useState<User | null>('auth-user', () => null)
+  const isLoading = useState<boolean>('auth-loading', () => false)
+  const error = useState<string>('auth-error', () => '')
 
   /**
    * Sign in with Google
    */
-  async function signInWithGoogle(): Promise<UserCredential> {
-    authStore.setLoading(true)
-    authStore.clearError()
+  async function signIn(): Promise<void> {
+    if (!isFirebaseConfigured()) {
+      error.value = 'Firebaseが設定されていません'
+      throw new Error('Firebase not configured')
+    }
+
+    isLoading.value = true
+    error.value = ''
 
     try {
-      const auth = useUtils().firebase.getAuthInstance()
+      const auth = useAuthInstance()
       const provider = new GoogleAuthProvider()
+
       const result = await signInWithPopup(auth, provider)
+      const firebaseUser = result.user
 
       // Create or update user document
-      await createUserDocument(result.user)
+      const db = useFirestoreInstance()
+      const userRef = doc(db, 'users', firebaseUser.uid)
 
-      return result
-    } catch (error: any) {
-      const errorMessage = handleFirebaseError(error)
-      authStore.setError(errorMessage)
-      throw error
-    } finally {
-      authStore.setLoading(false)
-    }
-  }
+      await setDoc(userRef, {
+        email: firebaseUser.email,
+        displayName: firebaseUser.displayName,
+        photoURL: firebaseUser.photoURL,
+        updatedAt: new Date().toISOString(),
+      }, { merge: true })
 
-  /**
-   * Create user document in Firestore
-   */
-  async function createUserDocument(user: User) {
-    try {
-      const db = useUtils().firebase.getFirestoreInstance()
-      const userRef = doc(db, 'users', user.uid)
-      const userDoc = await getDoc(userRef)
-
-      if (!userDoc.exists()) {
-        await setDoc(userRef, {
-          email: user.email,
-          displayName: user.displayName,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        })
+      user.value = {
+        uid: firebaseUser.uid,
+        email: firebaseUser.email || '',
+        displayName: firebaseUser.displayName || '',
+        photoURL: firebaseUser.photoURL || '',
       }
-    } catch (error) {
-      console.error('Failed to create user document:', error)
+    } catch (err: any) {
+      error.value = handleFirebaseError(err)
+      throw err
+    } finally {
+      isLoading.value = false
     }
   }
 
   /**
    * Sign out
    */
-  async function signOut() {
-    await authStore.signOut()
+  async function signOut(): Promise<void> {
+    isLoading.value = true
+    error.value = ''
+
+    try {
+      const auth = useAuthInstance()
+      await firebaseSignOut(auth)
+      user.value = null
+    } catch (err: any) {
+      error.value = handleFirebaseError(err)
+      throw err
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  /**
+   * Initialize auth state listener
+   */
+  function initAuthListener(): void {
+    if (!isFirebaseConfigured()) {
+      return
+    }
+
+    const auth = useAuthInstance()
+    onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        // Fetch user data from Firestore
+        try {
+          const db = useFirestoreInstance()
+          const userRef = doc(db, 'users', firebaseUser.uid)
+          const userDoc = await getDoc(userRef)
+
+          user.value = {
+            uid: firebaseUser.uid,
+            email: firebaseUser.email || '',
+            displayName: firebaseUser.displayName || '',
+            photoURL: firebaseUser.photoURL || '',
+          }
+        } catch (err) {
+          console.error('Failed to fetch user data:', err)
+        }
+      } else {
+        user.value = null
+      }
+      isLoading.value = false
+    })
   }
 
   return {
-    user: computed(() => authStore.user),
-    isAuthenticated: computed(() => authStore.isAuthenticated),
-    loading: computed(() => authStore.loading),
-    error: computed(() => authStore.error),
-
-    initializeAuthListener,
+    user: readonly(user),
+    isLoading: readonly(isLoading),
+    error: readonly(error),
     signIn,
-    signUp,
-    signInWithGoogle,
     signOut,
+    initAuthListener,
+    isAuthenticated: computed(() => !!user.value),
   }
 }

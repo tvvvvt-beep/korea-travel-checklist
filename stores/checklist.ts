@@ -10,6 +10,9 @@ export const useChecklistStore = defineStore('checklist', {
     searchQuery: '',
   }),
 
+  // Sync state
+  syncUnsubscribe: null as (() => void) | null,
+
   getters: {
     /**
      * Get filtered items based on current category and search query
@@ -113,7 +116,7 @@ export const useChecklistStore = defineStore('checklist', {
       }
 
       this.items.push(newItem)
-      this.saveToLocalStorage()
+      this.saveToAll()
       return newItem
     },
 
@@ -130,7 +133,7 @@ export const useChecklistStore = defineStore('checklist', {
         updatedAt: new Date(),
       }
 
-      this.saveToLocalStorage()
+      this.saveToAll()
       return this.items[index]
     },
 
@@ -142,7 +145,7 @@ export const useChecklistStore = defineStore('checklist', {
       if (item) {
         item.checked = !item.checked
         item.updatedAt = new Date()
-        this.saveToLocalStorage()
+        this.saveToAll()
       }
     },
 
@@ -153,7 +156,7 @@ export const useChecklistStore = defineStore('checklist', {
       const index = this.items.findIndex(item => item.id === id)
       if (index !== -1) {
         this.items.splice(index, 1)
-        this.saveToLocalStorage()
+        this.saveToAll()
       }
     },
 
@@ -168,7 +171,7 @@ export const useChecklistStore = defineStore('checklist', {
           existing.updatedAt = new Date()
         }
       })
-      this.saveToLocalStorage()
+      this.saveToAll()
     },
 
     /**
@@ -204,7 +207,7 @@ export const useChecklistStore = defineStore('checklist', {
      */
     loadItems(items: ChecklistItem[]) {
       this.items = items
-      this.saveToLocalStorage()
+      this.saveToAll()
     },
 
     /**
@@ -212,7 +215,7 @@ export const useChecklistStore = defineStore('checklist', {
      */
     clearAll() {
       this.items = []
-      this.saveToLocalStorage()
+      this.saveToAll()
     },
 
     /**
@@ -226,6 +229,18 @@ export const useChecklistStore = defineStore('checklist', {
         } catch (error) {
           console.error('Failed to save to localStorage:', error)
         }
+      }
+    },
+
+    /**
+     * Save to both localStorage and Firestore (if authenticated)
+     */
+    async saveToAll() {
+      this.saveToLocalStorage()
+      const { isAuthenticated } = useAuth()
+      const { saveToFirestore } = useSync()
+      if (isAuthenticated.value) {
+        await saveToFirestore(this.items)
       }
     },
 
@@ -249,6 +264,58 @@ export const useChecklistStore = defineStore('checklist', {
         } catch (error) {
           console.error('Failed to load from localStorage:', error)
         }
+      }
+    },
+
+    /**
+     * Initialize Firebase sync
+     */
+    async initializeSync() {
+      const { isAuthenticated } = useAuth()
+      const { loadFromFirestore, setupSyncListener } = useSync()
+
+      if (!isAuthenticated.value) {
+        return
+      }
+
+      // Load from Firestore on init
+      const firestoreItems = await loadFromFirestore()
+      if (firestoreItems && firestoreItems.length > 0) {
+        // Merge with local items, using Firestore as source of truth
+        this.items = firestoreItems
+        this.saveToLocalStorage()
+      }
+
+      // Setup real-time sync listener
+      if (this.syncUnsubscribe) {
+        this.syncUnsubscribe()
+      }
+
+      this.syncUnsubscribe = setupSyncListener((items) => {
+        // Handle incoming changes from Firestore
+        const localUpdatedAt = this.items.reduce((latest, item) => {
+          return item.updatedAt > latest ? item.updatedAt : latest
+        }, new Date(0))
+
+        const remoteUpdatedAt = items.reduce((latest, item) => {
+          return item.updatedAt > latest ? item.updatedAt : latest
+        }, new Date(0))
+
+        // Use the most recently updated version
+        if (remoteUpdatedAt > localUpdatedAt) {
+          this.items = items
+          this.saveToLocalStorage()
+        }
+      })
+    },
+
+    /**
+     * Cleanup sync listener
+     */
+    cleanupSync() {
+      if (this.syncUnsubscribe) {
+        this.syncUnsubscribe()
+        this.syncUnsubscribe = null
       }
     },
 

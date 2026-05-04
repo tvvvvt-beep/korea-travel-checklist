@@ -5,16 +5,8 @@
 </template>
 
 <script setup lang="ts">
-// Initialize app
+// Unregister service worker (causing issues in development)
 onMounted(async () => {
-  const checklistStore = useChecklistStore()
-  const syncStore = useSyncStore()
-
-  // onMounted only runs on client-side
-  checklistStore.loadFromLocalStorage()
-  syncStore.loadFromLocalStorage()
-
-  // Unregister service worker (causing issues in development)
   if ('serviceWorker' in navigator) {
     try {
       const registrations = await navigator.serviceWorker.getRegistrations()

@@ -6,25 +6,31 @@
         <span class="material-symbols-outlined text-primary">flight_takeoff</span>
         <span class="text-2xl font-black text-primary tracking-widest">DEPARTURES</span>
       </div>
-      <div class="flex gap-2">
-        <button
-          @click="showShareModal = true"
-          class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors"
-        >
-          share
-        </button>
-        <button
-          @click="showExportModal = true"
-          class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors"
-        >
-          download
-        </button>
-        <button
-          @click="showSettings = true"
-          class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors"
-        >
-          settings
-        </button>
+      <div class="flex items-center gap-3">
+        <!-- Sync Status -->
+        <SyncStatus />
+        <!-- Auth Button -->
+        <AuthButton />
+        <div class="flex gap-2 border-l border-surface-variant pl-3">
+          <button
+            @click="showShareModal = true"
+            class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors"
+          >
+            share
+          </button>
+          <button
+            @click="showExportModal = true"
+            class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors"
+          >
+            download
+          </button>
+          <button
+            @click="showSettings = true"
+            class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors"
+          >
+            settings
+          </button>
+        </div>
       </div>
     </header>
 
@@ -190,6 +196,8 @@ import CategoryTabs from '~/components/checklist/CategoryTabs.vue'
 import ShareModal from '~/components/ShareModal.vue'
 import ExportModal from '~/components/ExportModal.vue'
 import SettingsModal from '~/components/SettingsModal.vue'
+import AuthButton from '~/components/AuthButton.vue'
+import SyncStatus from '~/components/SyncStatus.vue'
 
 // Composables
 const checklistStore = useChecklistStore()
