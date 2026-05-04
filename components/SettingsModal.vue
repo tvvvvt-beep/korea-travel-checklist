@@ -8,6 +8,23 @@
         </h2>
 
         <div class="space-y-6">
+          <!-- Display settings -->
+          <section>
+            <h3 class="font-label-bold text-on-surface mb-2 uppercase tracking-wider flex items-center gap-1">
+              <span class="material-symbols-outlined text-sm">visibility</span>
+              表示設定
+            </h3>
+            <label class="flex items-center justify-between cursor-pointer bg-surface-container-low rounded-lg p-4 border border-surface-variant">
+              <span class="font-body-md text-on-surface">完了した項目を非表示</span>
+              <input
+                :checked="checklistStore.filterChecked"
+                @change="checklistStore.toggleFilterChecked()"
+                type="checkbox"
+                class="toggle-checkbox"
+              />
+            </label>
+          </section>
+
           <!-- Sync section -->
           <section>
             <h3 class="font-label-bold text-on-surface mb-2 uppercase tracking-wider flex items-center gap-1">
@@ -153,6 +170,8 @@ import { useAuth } from '~/composables/useAuth'
 import { useSync } from '~/composables/useSync'
 import { loadKoreaTravelPresets } from '~/data/korea-templates'
 import { exportBackup, importBackup } from '~/utils/storage'
+
+const checklistStore = useChecklistStore()
 
 const emit = defineEmits<{
   close: []

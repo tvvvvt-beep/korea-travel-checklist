@@ -74,36 +74,6 @@
         />
       </section>
 
-      <!-- Alerts and Filter (horizontal) -->
-      <div class="mb-md flex-shrink-0">
-        <div class="flex flex-wrap gap-2 items-center">
-          <!-- Overdue alert -->
-          <div
-            v-if="stats.overdue > 0"
-            class="bg-error-container text-on-error-container px-3 py-2 rounded-lg flex items-center gap-2 flex-shrink-0"
-          >
-            <span class="material-symbols-outlined text-[18px]">warning</span>
-            <span class="font-label-bold text-sm">期限切れ: {{ stats.overdue }}</span>
-          </div>
-          <!-- Due soon alert -->
-          <div
-            v-if="stats.dueSoon > 0"
-            class="bg-delayed text-white px-3 py-2 rounded-lg flex items-center gap-2 flex-shrink-0"
-          >
-            <span class="material-symbols-outlined text-[18px]">notification_important</span>
-            <span class="font-label-bold text-sm">期限が近い: {{ stats.dueSoon }}</span>
-          </div>
-          <!-- Filter button -->
-          <button
-            @click="toggleFilterChecked"
-            class="btn btn-sm flex-shrink-0"
-            :class="checklistStore.filterChecked ? 'btn-primary' : 'btn-secondary'"
-          >
-            {{ checklistStore.filterChecked ? '完了表示中' : '完了非表示' }}
-          </button>
-        </div>
-      </div>
-
       <!-- Scrollable Checklist Container -->
       <section class="flex-1 overflow-y-auto pr-sm pb-lg custom-scrollbar">
         <!-- Display items for active category -->
@@ -223,7 +193,7 @@ import SettingsModal from '~/components/SettingsModal.vue'
 
 // Composables
 const checklistStore = useChecklistStore()
-const { filteredItems, stats, toggleFilterChecked, toggleItem, updateItem, deleteItem, addItem } = useChecklist()
+const { filteredItems, stats, toggleItem, updateItem, deleteItem, addItem } = useChecklist()
 
 // Use store's active category
 const activeCategory = computed(() => checklistStore.activeCategory)
