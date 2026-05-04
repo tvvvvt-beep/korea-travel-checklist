@@ -88,7 +88,7 @@
       <section class="mb-lg flex-shrink-0">
         <CategoryTabs
           :active-category="activeCategory"
-          @select="activeCategory = $event"
+          @select="handleCategorySelect"
         />
       </section>
 
@@ -144,7 +144,7 @@
           <!-- Items in active category -->
           <div class="flex flex-col gap-sm">
             <label
-              v-for="item in getCategoryItems(activeCategory)"
+              v-for="item in getCategoryItems()"
               :key="item.id"
               class="boarding-pass"
               :class="{
@@ -270,19 +270,10 @@ import SettingsModal from '~/components/SettingsModal.vue'
 
 // Composables
 const checklistStore = useChecklistStore()
-const { items, filteredItems, stats, setSearchQuery, setSortBy, toggleFilterChecked, toggleItem, updateItem, deleteItem, addItem } = useChecklist()
+const { filteredItems, stats, setSearchQuery, setSortBy, toggleFilterChecked, toggleItem, updateItem, deleteItem, addItem } = useChecklist()
 
-// Active category (local state)
-const activeCategory = ref<Category>('essentials')
-
-// Categories for display
-const categories = ref([
-  { id: 'essentials' as Category, label: '必需品', icon: 'passport' },
-  { id: 'electronics' as Category, label: '電子機器', icon: 'devices' },
-  { id: 'clothing' as Category, label: '服装・小物', icon: 'checkroom' },
-  { id: 'korea-specific' as Category, label: '韓国で役立つ', icon: 'favorite' },
-  { id: 'documents' as Category, label: '書類', icon: 'description' },
-])
+// Use store's active category
+const activeCategory = computed(() => checklistStore.activeCategory)
 
 // State
 const showAddForm = ref(false)
@@ -298,9 +289,14 @@ onMounted(() => {
   }
 })
 
-// Get items for a specific category
-function getCategoryItems(categoryId: Category): ChecklistItem[] {
-  return filteredItems.value.filter(item => item.category === categoryId)
+// Handle category selection
+function handleCategorySelect(category: Category) {
+  checklistStore.setActiveCategory(category)
+}
+
+// Get items for the active category (filteredItems already contains the active category)
+function getCategoryItems(): ChecklistItem[] {
+  return filteredItems.value
 }
 
 // Methods
