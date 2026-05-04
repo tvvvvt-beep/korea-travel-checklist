@@ -84,6 +84,14 @@
         </div>
       </div>
 
+      <!-- Category Tabs -->
+      <section class="mb-lg flex-shrink-0">
+        <CategoryTabs
+          :active-category="activeCategory"
+          @select="activeCategory = $event"
+        />
+      </section>
+
       <!-- Search and filter -->
       <div class="mb-md flex-shrink-0">
         <div class="flex gap-2">
@@ -121,26 +129,22 @@
 
       <!-- Scrollable Checklist Container -->
       <section class="flex-1 overflow-y-auto pr-sm pb-lg custom-scrollbar">
-        <!-- Display items grouped by category -->
-        <div
-          v-for="category in categories"
-          :key="category.id"
-          class="mb-xl relative"
-        >
+        <!-- Display items for active category -->
+        <div class="mb-xl relative">
           <!-- Category Header -->
           <div class="category-header">
             <h2 class="font-headline-sm text-headline-sm text-primary-container uppercase tracking-tight flex items-center gap-xs">
               <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">
-                {{ getCategoryInfo(category.id).icon }}
+                {{ getCategoryInfo(activeCategory).icon }}
               </span>
-              {{ getCategoryInfo(category.id).label }}
+              {{ getCategoryInfo(activeCategory).label }}
             </h2>
           </div>
 
-          <!-- Items in this category -->
+          <!-- Items in active category -->
           <div class="flex flex-col gap-sm">
             <label
-              v-for="item in getCategoryItems(category.id)"
+              v-for="item in getCategoryItems(activeCategory)"
               :key="item.id"
               class="boarding-pass"
               :class="{
@@ -259,13 +263,17 @@ import { getCategoryInfo } from '~/utils/categories'
 import { loadKoreaTravelPresets } from '~/data/korea-templates'
 import type { ChecklistItem, Category } from '~/types/checklist'
 import AddItemModal from '~/components/checklist/AddItemModal.vue'
+import CategoryTabs from '~/components/checklist/CategoryTabs.vue'
 import ShareModal from '~/components/ShareModal.vue'
 import ExportModal from '~/components/ExportModal.vue'
 import SettingsModal from '~/components/SettingsModal.vue'
 
 // Composables
 const checklistStore = useChecklistStore()
-const { items, filteredItems, activeCategory, stats, setActiveCategory, setSearchQuery, setSortBy, toggleFilterChecked, toggleItem, updateItem, deleteItem, addItem } = useChecklist()
+const { items, filteredItems, stats, setSearchQuery, setSortBy, toggleFilterChecked, toggleItem, updateItem, deleteItem, addItem } = useChecklist()
+
+// Active category (local state)
+const activeCategory = ref<Category>('essentials')
 
 // Categories for display
 const categories = ref([
