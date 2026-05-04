@@ -120,9 +120,9 @@ export const SHARES_COLLECTION = 'shares'
 /**
  * Get user document reference
  */
+import { doc } from 'firebase/firestore'
+
 export function getUserDocRef(userId: string) {
   const db = getFirestoreInstance()
-  import('firebase/firestore').then(({ doc, getDoc }) => {
-    return doc(db, USER_COLLECTION, userId)
-  })
+  return doc(db, USER_COLLECTION, userId)
 }

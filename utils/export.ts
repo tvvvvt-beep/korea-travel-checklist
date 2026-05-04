@@ -172,7 +172,6 @@ export async function exportToText(
     clothing: '服装・小物',
     'korea-specific': '韓国で役立つ',
     documents: '書類・手続き',
-    custom: 'カスタム',
   }
 
   let content = `ソウル旅行前チェックリスト\n${'='.repeat(30)}\n`
@@ -182,7 +181,7 @@ export async function exportToText(
   filteredItems = sortItems(filteredItems, options.sortBy)
 
   if (options.groupByCategory) {
-    const categories: Category[] = ['essentials', 'electronics', 'clothing', 'korea-specific', 'documents', 'custom']
+    const categories: Category[] = ['essentials', 'electronics', 'clothing', 'korea-specific', 'documents']
 
     for (const category of categories) {
       const categoryItems = filteredItems.filter(item => item.category === category)
@@ -247,7 +246,6 @@ export async function exportToCSV(
     clothing: '服装・小物',
     'korea-specific': '韓国で役立つ',
     documents: '書類・手続き',
-    custom: 'カスタム',
   }
 
   let csv = '\uFEFF' // BOM for UTF-8

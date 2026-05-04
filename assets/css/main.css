@@ -9,7 +9,9 @@
 /* Custom base styles */
 @layer base {
   body {
-    @apply bg-surface text-on-surface antialiased;
+    background-color: theme('colors.surface');
+    color: theme('colors.on-surface');
+    @apply antialiased;
     font-family: 'Plus Jakarta Sans', sans-serif;
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
