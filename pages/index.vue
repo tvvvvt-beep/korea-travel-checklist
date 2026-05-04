@@ -66,60 +66,37 @@
         </p>
       </section>
 
-      <!-- Alerts -->
-      <div v-if="stats.overdue > 0 || stats.dueSoon > 0" class="mb-md flex-shrink-0">
-        <div
-          v-if="stats.overdue > 0"
-          class="bg-error-container text-on-error-container px-4 py-3 rounded-lg mb-2 flex items-center gap-2"
-        >
-          <span class="material-symbols-outlined">warning</span>
-          <span class="font-label-bold">期限切れ: {{ stats.overdue }} 件</span>
-        </div>
-        <div
-          v-if="stats.dueSoon > 0"
-          class="bg-delayed text-white px-4 py-3 rounded-lg flex items-center gap-2"
-        >
-          <span class="material-symbols-outlined">notification_important</span>
-          <span class="font-label-bold">期限が近い: {{ stats.dueSoon }} 件</span>
-        </div>
-      </div>
-
       <!-- Category Tabs -->
-      <section class="mb-lg flex-shrink-0">
+      <section class="mb-md flex-shrink-0">
         <CategoryTabs
           :active-category="activeCategory"
           @select="handleCategorySelect"
         />
       </section>
 
-      <!-- Search and filter -->
+      <!-- Alerts and Filter (horizontal) -->
       <div class="mb-md flex-shrink-0">
-        <div class="flex gap-2">
-          <div class="relative flex-1">
-            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
-            <input
-              :value="checklistStore.searchQuery"
-              @input="setSearchQuery(($event.target as HTMLInputElement).value)"
-              type="text"
-              placeholder="フライト検索..."
-              class="input pl-10"
-            />
-          </div>
-          <select
-            :value="checklistStore.sortBy"
-            @change="setSortBy(($event.target as HTMLSelectElement).value)"
-            class="input w-auto"
+        <div class="flex flex-wrap gap-2 items-center">
+          <!-- Overdue alert -->
+          <div
+            v-if="stats.overdue > 0"
+            class="bg-error-container text-on-error-container px-3 py-2 rounded-lg flex items-center gap-2 flex-shrink-0"
           >
-            <option value="order">順序</option>
-            <option value="deadline">出発時刻</option>
-            <option value="priority">優先度</option>
-            <option value="name">フライト名</option>
-          </select>
-        </div>
-        <div class="flex gap-2 mt-2">
+            <span class="material-symbols-outlined text-[18px]">warning</span>
+            <span class="font-label-bold text-sm">期限切れ: {{ stats.overdue }}</span>
+          </div>
+          <!-- Due soon alert -->
+          <div
+            v-if="stats.dueSoon > 0"
+            class="bg-delayed text-white px-3 py-2 rounded-lg flex items-center gap-2 flex-shrink-0"
+          >
+            <span class="material-symbols-outlined text-[18px]">notification_important</span>
+            <span class="font-label-bold text-sm">期限が近い: {{ stats.dueSoon }}</span>
+          </div>
+          <!-- Filter button -->
           <button
             @click="toggleFilterChecked"
-            class="btn btn-sm"
+            class="btn btn-sm flex-shrink-0"
             :class="checklistStore.filterChecked ? 'btn-primary' : 'btn-secondary'"
           >
             {{ checklistStore.filterChecked ? '完了表示中' : '完了非表示' }}
@@ -270,7 +247,7 @@ import SettingsModal from '~/components/SettingsModal.vue'
 
 // Composables
 const checklistStore = useChecklistStore()
-const { filteredItems, stats, setSearchQuery, setSortBy, toggleFilterChecked, toggleItem, updateItem, deleteItem, addItem } = useChecklist()
+const { filteredItems, stats, toggleFilterChecked, toggleItem, updateItem, deleteItem, addItem } = useChecklist()
 
 // Use store's active category
 const activeCategory = computed(() => checklistStore.activeCategory)
