@@ -48,9 +48,10 @@
                   </button>
                   <button
                     @click="handleSignOut"
-                    class="btn btn-secondary"
+                    class="btn btn-secondary btn-icon"
+                    title="ログアウト"
                   >
-                    <span class="material-symbols-outlined align-middle">logout</span>
+                    <span class="material-symbols-outlined">logout</span>
                   </button>
                 </div>
                 <p v-if="lastSync" class="font-label-sm text-on-surface-variant flex items-center gap-1">

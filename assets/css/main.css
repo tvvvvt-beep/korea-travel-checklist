@@ -59,6 +59,14 @@
     @apply btn bg-primary-container text-on-primary-container hover:opacity-90;
   }
 
+  .btn-sm {
+    @apply px-2 py-1 text-sm;
+  }
+
+  .btn-icon {
+    @apply p-2 flex items-center justify-center w-10 h-10;
+  }
+
   .btn-ghost {
     @apply btn border-2 border-primary text-primary bg-transparent hover:bg-primary-container hover:text-on-primary-container;
   }
