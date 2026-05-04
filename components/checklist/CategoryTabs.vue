@@ -15,15 +15,6 @@
         {{ category.icon }}
       </span>
       <span class="hidden sm:inline">{{ category.name }}</span>
-      <span
-        v-if="getCategoryStats(category.id).total > 0"
-        class="text-xs px-2 py-0.5 rounded-full font-label-sm"
-        :class="isActive(category.id)
-          ? 'bg-on-primary-container bg-opacity-30'
-          : 'bg-surface-variant'"
-      >
-        {{ getCategoryStats(category.id).checked }}/{{ getCategoryStats(category.id).total }}
-      </span>
     </button>
   </div>
 </template>
@@ -46,14 +37,5 @@ const categories = Object.values(CATEGORY_DEFINITIONS)
 
 function isActive(categoryId: Category): boolean {
   return props.activeCategory === categoryId
-}
-
-function getCategoryStats(categoryId: Category): { total: number; checked: number } {
-  const checklistStore = useChecklistStore()
-  const items = checklistStore.items.filter(item => item.category === categoryId)
-  return {
-    total: items.length,
-    checked: items.filter(item => item.checked).length,
-  }
 }
 </script>

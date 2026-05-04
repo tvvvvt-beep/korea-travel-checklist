@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-surface safe-area-top safe-area-bottom h-screen overflow-hidden flex flex-col">
+  <div class="min-h-screen bg-surface safe-area-top safe-area-bottom flex flex-col">
     <!-- Top App Bar -->
     <header class="bg-surface-container-lowest text-primary font-headline-md font-bold tracking-tight uppercase border-b-2 border-primary shadow-sm flex justify-between items-center w-full px-6 py-4 max-w-none flex-shrink-0 z-10">
       <div class="flex items-center gap-sm">
@@ -29,7 +29,7 @@
     </header>
 
     <!-- Main Content Area -->
-    <main class="flex-1 overflow-hidden flex flex-col pt-md px-margin md:px-lg max-w-3xl mx-auto w-full relative">
+    <main class="flex-1 overflow-y-auto flex flex-col pt-md px-margin md:px-lg max-w-3xl mx-auto w-full relative">
       <!-- Header Board (Minimalist Horizontal) -->
       <section class="mb-md flex-shrink-0">
         <div class="bg-surface-container-lowest rounded-lg p-md shadow-boarding-pass flex justify-between items-center border border-surface-variant">
@@ -74,8 +74,8 @@
         />
       </section>
 
-      <!-- Scrollable Checklist Container -->
-      <section class="flex-1 overflow-y-auto pr-sm pb-lg custom-scrollbar">
+      <!-- Checklist Container -->
+      <section class="pb-lg">
         <!-- Display items for active category -->
         <div class="mb-xl relative">
           <!-- Category Header -->
@@ -146,10 +146,10 @@
         <div class="h-20"></div>
       </section>
 
-      <!-- FAB Add Item (Contextual) -->
+      <!-- FAB Add Item (Fixed) -->
       <button
         @click="showAddForm = true"
-        class="fab-button absolute bottom-md right-margin md:right-lg"
+        class="fab-button fixed bottom-md right-margin md:right-lg z-20"
       >
         <span class="material-symbols-outlined text-[28px]">add</span>
       </button>
