@@ -1,4 +1,4 @@
-import type { Category, CategoryInfo } from '~/types/checklist'
+import type { Category, CategoryInfo, ChecklistItem } from '~/types/checklist'
 
 /**
  * Category metadata
