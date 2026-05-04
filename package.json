@@ -1,0 +1,58 @@
+{
+  "name": "korea-travel-checklist",
+  "version": "1.0.0",
+  "description": "Seoul travel preparation checklist app for May 2026",
+  "type": "module",
+  "scripts": {
+    "dev": "nuxt dev",
+    "build": "nuxt build",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "test": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:ui": "vitest --ui",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "type-check": "nuxi typecheck"
+  },
+  "keywords": [
+    "nuxt",
+    "vue",
+    "travel",
+    "checklist",
+    "korea",
+    "pwa"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@nuxt/typescript-build": "^3.0.2",
+    "@nuxtjs/pwa": "^3.3.5",
+    "firebase": "^12.12.1",
+    "jspdf": "^4.2.1",
+    "nuxt": "^4.4.4",
+    "pinia": "^2.3.1",
+    "vue": "^3.5.33"
+  },
+  "devDependencies": {
+    "@nuxt/eslint-config": "^1.15.2",
+    "@nuxt/test-utils": "^4.0.3",
+    "@nuxtjs/tailwindcss": "^6.14.0",
+    "@pinia/nuxt": "^0.11.3",
+    "@typescript-eslint/eslint-plugin": "^8.59.1",
+    "@typescript-eslint/parser": "^8.59.1",
+    "@vitejs/plugin-vue": "^6.0.6",
+    "@vitest/coverage-v8": "^2.1.9",
+    "@vitest/ui": "^2.1.9",
+    "@vue/test-utils": "^2.4.10",
+    "eslint": "^10.3.0",
+    "eslint-plugin-vue": "^10.9.0",
+    "happy-dom": "^20.9.0",
+    "jsdom": "^29.1.1",
+    "prettier": "^3.8.3",
+    "typescript": "^6.0.3",
+    "vitest": "^2.1.9",
+    "vue-tsc": "^3.2.7"
+  }
+}

@@ -1,0 +1,220 @@
+<template>
+  <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" @click.self="$emit('close')">
+    <div class="bg-white rounded-xl shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto animate-slide-up">
+      <div class="p-6">
+        <h2 class="text-xl font-bold text-gray-900 mb-4">設定</h2>
+
+        <div class="space-y-6">
+          <!-- Sync section -->
+          <section>
+            <h3 class="font-medium text-gray-900 mb-2">クラウド同期</h3>
+            <div class="bg-gray-50 rounded-lg p-4">
+              <div v-if="isAuthenticated" class="space-y-3">
+                <p class="text-sm text-gray-600">
+                  ログイン中: {{ userEmail }}
+                </p>
+                <div class="flex gap-2">
+                  <button
+                    @click="handleSync"
+                    :disabled="syncing"
+                    class="btn btn-primary flex-1"
+                  >
+                    {{ syncing ? '同期中...' : '今すぐ同期' }}
+                  </button>
+                  <button
+                    @click="handleSignOut"
+                    class="btn btn-secondary"
+                  >
+                    ログアウト
+                  </button>
+                </div>
+                <p v-if="lastSync" class="text-xs text-gray-500">
+                  最終同期: {{ lastSync }}
+                </p>
+                <p v-if="syncError" class="text-xs text-red-600">
+                  {{ syncError }}
+                </p>
+              </div>
+              <div v-else class="space-y-3">
+                <p class="text-sm text-gray-600">
+                  ログインすると、複数デバイス間でチェックリストを同期できます。
+                </p>
+                <button
+                  @click="showAuthModal = true"
+                  class="btn btn-primary w-full"
+                >
+                  ログイン
+                </button>
+              </div>
+            </div>
+          </section>
+
+          <!-- Data management -->
+          <section>
+            <h3 class="font-medium text-gray-900 mb-2">データ管理</h3>
+            <div class="space-y-2">
+              <button
+                @click="handleImportPresets"
+                class="btn btn-secondary w-full"
+              >
+                🇰🇷 韓国旅行プリセットを読み込み
+              </button>
+              <button
+                @click="handleExportBackup"
+                class="btn btn-secondary w-full"
+              >
+                バックアップをエクスポート
+              </button>
+              <button
+                @click="handleImportBackup"
+                class="btn btn-secondary w-full"
+              >
+                バックアップから復元
+              </button>
+              <button
+                @click="handleClearData"
+                class="btn btn-danger w-full"
+              >
+                すべてのデータを削除
+              </button>
+            </div>
+          </section>
+
+          <!-- Notifications -->
+          <section>
+            <h3 class="font-medium text-gray-900 mb-2">通知</h3>
+            <label class="flex items-center justify-between">
+              <span class="text-sm">期限リマインダーを有効にする</span>
+              <input
+                v-model="notificationsEnabled"
+                type="checkbox"
+                class="rounded"
+              />
+            </label>
+          </section>
+
+          <!-- App info -->
+          <section class="text-xs text-gray-500">
+            <p>ソウル旅行前チェックリスト v1.0.0</p>
+            <p>旅行日: 2026年5月13日〜18日</p>
+          </section>
+        </div>
+
+        <!-- Close button -->
+        <div class="mt-6">
+          <button
+            @click="$emit('close')"
+            class="btn btn-secondary w-full"
+          >
+            閉じる
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Auth modal -->
+    <AuthModal
+      v-if="showAuthModal"
+      @close="showAuthModal = false"
+    />
+  </div>
+</template>
+
+<script setup lang="ts">
+import { useAuth } from '~/composables/useAuth'
+import { useSync } from '~/composables/useSync'
+import { loadKoreaTravelPresets } from '~/data/korea-templates'
+import { exportBackup, importBackup } from '~/utils/storage'
+
+const emit = defineEmits<{
+  close: []
+}>()
+
+const { user, isAuthenticated, userEmail, signInWithGoogle, signOut } = useAuth()
+const { enabled, syncing, lastSync, error: syncError, enableSync, manualSync } = useSync()
+
+const showAuthModal = ref(false)
+const notificationsEnabled = ref(false)
+
+async function handleSync() {
+  try {
+    await manualSync()
+  } catch (error) {
+    console.error('Sync failed:', error)
+  }
+}
+
+async function handleSignOut() {
+  try {
+    await signOut()
+  } catch (error) {
+    console.error('Sign out failed:', error)
+  }
+}
+
+async function handleImportPresets() {
+  if (confirm('韓国旅行プリセットを読み込みますか？現在の項目はクリアされます。')) {
+    const checklistStore = useChecklistStore()
+    const presets = loadKoreaTravelPresets()
+    checklistStore.loadItems(presets)
+    alert('プリセットを読み込みました')
+  }
+}
+
+async function handleExportBackup() {
+  try {
+    const backup = await exportBackup()
+    const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `checklist-backup-${new Date().toISOString().split('T')[0]}.json`
+    link.click()
+    URL.revokeObjectURL(url)
+  } catch (error) {
+    console.error('Backup export failed:', error)
+    alert('バックアップのエクスポートに失敗しました')
+  }
+}
+
+async function handleImportBackup() {
+  const input = document.createElement('input')
+  input.type = 'file'
+  input.accept = 'application/json'
+
+  input.onchange = async (e) => {
+    const file = (e.target as HTMLInputElement).files?.[0]
+    if (!file) return
+
+    try {
+      const text = await file.text()
+      const backup = JSON.parse(text)
+
+      if (!backup.version || !backup.items) {
+        throw new Error('Invalid backup file')
+      }
+
+      await importBackup(backup)
+
+      const checklistStore = useChecklistStore()
+      checklistStore.loadItems(backup.items)
+
+      alert('バックアップを復元しました')
+      emit('close')
+    } catch (error) {
+      console.error('Backup import failed:', error)
+      alert('バックアップの復元に失敗しました')
+    }
+  }
+
+  input.click()
+}
+
+async function handleClearData() {
+  if (confirm('本当にすべてのデータを削除してもよろしいですか？この操作は取り消せません。')) {
+    const checklistStore = useChecklistStore()
+    checklistStore.clearAll()
+    alert('データを削除しました')
+  }
+}
+</script>

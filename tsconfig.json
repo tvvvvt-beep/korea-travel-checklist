@@ -1,0 +1,40 @@
+{
+  "compilerOptions": {
+    "ignoreDeprecations": "6.0",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "moduleResolution": "bundler",
+    "target": "ES2022",
+    "module": "ESNext",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "baseUrl": ".",
+    "paths": {
+      "~/*": ["./*"],
+      "@/*": ["./*"],
+      "~/types/*": ["./types/*"],
+      "~/components/*": ["./components/*"],
+      "~/stores/*": ["./stores/*"],
+      "~/utils/*": ["./utils/*"],
+      "~/composables/*": ["./composables/*"],
+      "~/data/*": ["./data/*"]
+    },
+    "types": ["vitest/globals", "@nuxt/test-utils", "happy-dom"],
+    "jsx": "preserve",
+    "jsxImportSource": "vue"
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.vue",
+    ".nuxt/types/nitro-imports.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    ".nuxt"
+  ]
+}
