@@ -39,13 +39,6 @@ export const CATEGORIES: Record<Category, CategoryInfo> = {
     description: '保険、e-Arrival Cardなど',
     color: 'bg-orange-500',
   },
-  custom: {
-    id: 'custom',
-    name: 'カスタム',
-    icon: '✏️',
-    description: '自分で追加した項目',
-    color: 'bg-gray-500',
-  },
 }
 
 /**
@@ -101,12 +94,6 @@ export function getCategoryColorClasses(category: Category): {
       text: 'text-orange-700',
       border: 'border-orange-200',
       hover: 'hover:bg-orange-100',
-    },
-    custom: {
-      bg: 'bg-gray-50',
-      text: 'text-gray-700',
-      border: 'border-gray-200',
-      hover: 'hover:bg-gray-100',
     },
   }
 

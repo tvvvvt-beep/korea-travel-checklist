@@ -48,14 +48,13 @@ export async function exportToPDF(
 
   // Group by category if requested
   if (options.groupByCategory) {
-    const categories: Category[] = ['essentials', 'electronics', 'clothing', 'korea-specific', 'documents', 'custom']
+    const categories: Category[] = ['essentials', 'electronics', 'clothing', 'korea-specific', 'documents']
     const categoryNames: Record<Category, string> = {
       essentials: '必需品',
       electronics: '電子機器',
       clothing: '服装・小物',
       'korea-specific': '韓国で役立つ',
       documents: '書類・手続き',
-      custom: 'カスタム',
     }
 
     for (const category of categories) {

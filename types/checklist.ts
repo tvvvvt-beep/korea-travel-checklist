@@ -23,8 +23,7 @@ export type Category =
   | 'electronics'       // 電子機器
   | 'clothing'          // 服装・小物
   | 'korea-specific'    // 韓国で役立つ
-  | 'documents'         // 書類・手続き
-  | 'custom';           // カスタム
+  | 'documents';         // 書類・手続き
 
 /**
  * Priority levels for items

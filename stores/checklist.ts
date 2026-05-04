@@ -18,9 +18,7 @@ export const useChecklistStore = defineStore('checklist', {
       let items = this.items
 
       // Filter by category
-      if (this.activeCategory !== 'custom') {
-        items = items.filter(item => item.category === this.activeCategory)
-      }
+      items = items.filter(item => item.category === this.activeCategory)
 
       // Filter by checked status
       if (this.filterChecked) {
@@ -45,7 +43,7 @@ export const useChecklistStore = defineStore('checklist', {
      */
     stats(): ChecklistStats {
       const byCategory = {} as ChecklistStats['byCategory']
-      const categories: Category[] = ['essentials', 'electronics', 'clothing', 'korea-specific', 'documents', 'custom']
+      const categories: Category[] = ['essentials', 'electronics', 'clothing', 'korea-specific', 'documents']
 
       categories.forEach(cat => {
         const catItems = this.items.filter(item => item.category === cat)
@@ -87,7 +85,7 @@ export const useChecklistStore = defineStore('checklist', {
      */
     itemsByCategory(): Record<Category, ChecklistItem[]> {
       const result = {} as Record<Category, ChecklistItem[]>
-      const categories: Category[] = ['essentials', 'electronics', 'clothing', 'korea-specific', 'documents', 'custom']
+      const categories: Category[] = ['essentials', 'electronics', 'clothing', 'korea-specific', 'documents']
 
       categories.forEach(cat => {
         result[cat] = this.items.filter(item => item.category === cat)

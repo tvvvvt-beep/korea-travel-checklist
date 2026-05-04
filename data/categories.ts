@@ -39,13 +39,6 @@ export const CATEGORY_DEFINITIONS: Record<Category, CategoryInfo> = {
     description: '保険、e-Arrival Cardなど',
     color: 'bg-orange-500',
   },
-  custom: {
-    id: 'custom',
-    name: 'カスタム',
-    icon: '✏️',
-    description: '自分で追加した項目',
-    color: 'bg-gray-500',
-  },
 }
 
 /**

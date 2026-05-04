@@ -44,13 +44,12 @@ describe('Categories Utils', () => {
   describe('getAllCategories', () => {
     it('should return all categories', () => {
       const categories = getAllCategories()
-      expect(categories).toHaveLength(6)
+      expect(categories).toHaveLength(5)
       expect(categories.map(c => c.id)).toContain('essentials')
       expect(categories.map(c => c.id)).toContain('electronics')
       expect(categories.map(c => c.id)).toContain('clothing')
       expect(categories.map(c => c.id)).toContain('korea-specific')
       expect(categories.map(c => c.id)).toContain('documents')
-      expect(categories.map(c => c.id)).toContain('custom')
     })
   })
 
