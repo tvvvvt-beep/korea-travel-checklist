@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-surface safe-area-top safe-area-bottom pb-24 md:pb-0 h-screen overflow-hidden flex flex-col">
+  <div class="min-h-screen bg-surface safe-area-top safe-area-bottom h-screen overflow-hidden flex flex-col">
     <!-- Top App Bar -->
     <header class="bg-surface-container-lowest text-primary font-headline-md font-bold tracking-tight uppercase border-b-2 border-primary shadow-sm flex justify-between items-center w-full px-6 py-4 max-w-none flex-shrink-0 z-10">
       <div class="flex items-center gap-sm">
@@ -184,30 +184,6 @@
         <span class="material-symbols-outlined text-[28px]">add</span>
       </button>
     </main>
-
-    <!-- Bottom Navigation Bar -->
-    <nav class="md:hidden bg-primary font-headline-md text-[10px] font-bold uppercase tracking-tighter fixed bottom-0 w-full z-50 border-t-2 border-secondary-container shadow-boarding-pass h-20 flex justify-around items-center px-4 pb-safe">
-      <!-- Inactive - Itinerary -->
-      <a class="flex flex-col items-center justify-center text-on-primary opacity-70 px-4 py-1 mt-1 hover:opacity-100 transition-opacity" href="#">
-        <span class="material-symbols-outlined mb-1">event_note</span>
-        <span>Itinerary</span>
-      </a>
-      <!-- Active - Check-in -->
-      <a class="flex flex-col items-center justify-center bottom-nav-active px-4 py-1 mt-1" href="#">
-        <span class="material-symbols-outlined mb-1">fact_check</span>
-        <span>Check-in</span>
-      </a>
-      <!-- Inactive - Terminals -->
-      <a class="flex flex-col items-center justify-center text-on-primary opacity-70 px-4 py-1 mt-1 hover:opacity-100 transition-opacity" href="#">
-        <span class="material-symbols-outlined mb-1">map</span>
-        <span>Terminals</span>
-      </a>
-      <!-- Inactive - Account -->
-      <a class="flex flex-col items-center justify-center text-on-primary opacity-70 px-4 py-1 mt-1 hover:opacity-100 transition-opacity" href="#">
-        <span class="material-symbols-outlined mb-1">person</span>
-        <span>Account</span>
-      </a>
-    </nav>
 
     <!-- Modals -->
     <AddItemModal
