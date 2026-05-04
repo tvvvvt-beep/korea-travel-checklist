@@ -7,8 +7,8 @@ export default defineNuxtPlugin(async () => {
   const { initAuthListener, isAuthenticated } = useAuth()
   const checklistStore = useChecklistStore()
 
-  // Only initialize if Firebase is configured
-  if (isFirebaseConfigured()) {
+  // Only initialize on the client side
+  if (import.meta.client && isFirebaseConfigured()) {
     // Initialize auth state listener
     initAuthListener()
 

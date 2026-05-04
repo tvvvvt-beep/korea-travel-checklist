@@ -23,10 +23,12 @@ export function initializeFirebase(): FirebaseApp {
     appId: config.public.firebaseAppId,
   }
 
-  // Validate required config
+  // Prevent server-side initialization if config is missing
   if (!firebaseConfig.apiKey || !firebaseConfig.projectId) {
-    console.warn('Firebase configuration is missing. Some features will be unavailable.')
-    throw new Error('Firebase configuration is incomplete')
+    if (import.meta.client) {
+      console.warn('Firebase configuration is missing. Some features will be unavailable.')
+    }
+    return null as any
   }
 
   app = initializeApp(firebaseConfig)
@@ -40,11 +42,12 @@ export function getAuthInstance(): Auth {
   if (!auth) {
     try {
       const firebaseApp = initializeFirebase()
-      auth = getAuth(firebaseApp)
-      auth.languageCode = 'ja'
+      if (firebaseApp) {
+        auth = getAuth(firebaseApp)
+        auth.languageCode = 'ja'
+      }
     } catch (error) {
       console.error('Failed to initialize Firebase Auth:', error)
-      throw error
     }
   }
   return auth
@@ -57,10 +60,11 @@ export function getFirestoreInstance(): Firestore {
   if (!db) {
     try {
       const firebaseApp = initializeFirebase()
-      db = getFirestore(firebaseApp)
+      if (firebaseApp) {
+        db = getFirestore(firebaseApp)
+      }
     } catch (error) {
       console.error('Failed to initialize Firestore:', error)
-      throw error
     }
   }
   return db
